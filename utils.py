@@ -12,13 +12,15 @@ from sqlalchemy import select
 import models
 from config import settings
 from database import get_db
-
+from schemas import UserResponse, VendorResponse
 
 HASHING_ALGORITHM = settings.hashing_algorithm
 JWT_SECRET_KEY = settings.jwt_secret_key
 ACCESS_TOKEN_EXPIRE_MINUTES = settings.access_token_expire_minutes
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")  # token comes from /token
+oauth2_scheme = OAuth2PasswordBearer(
+    tokenUrl="/auth/token/user"
+)  # token comes from /token
 password_hash = PasswordHash.recommended()
 
 
@@ -76,12 +78,28 @@ async def authenticate_user(
     db: Annotated[AsyncSession, Depends(get_db)],
 ):
     result = await db.execute(
-        select(models.Users).where(models.Users.username == username)
+        select(models.User).where(models.User.username == username)
     )
     user = result.scalars().first()
     if not user:
         return False
-    if not verify_password(password, user.password):
+    if not verify_password(password, user.password_hash):
+        return False
+    return user
+
+
+async def authenticate_vendor(
+    username: str,
+    password: str,
+    db: Annotated[AsyncSession, Depends(get_db)],
+):
+    result = await db.execute(
+        select(models.Vendor).where(models.Vendor.email == username)
+    )
+    user = result.scalars().first()
+    if not user:
+        return False
+    if not verify_password(password, user.password_hash):
         return False
     return user
 
@@ -89,22 +107,18 @@ async def authenticate_user(
 async def get_current_user(
     token: Annotated[str, Depends(oauth2_scheme)],
     db: Annotated[AsyncSession, Depends(get_db)],
-) -> models.Users:
+) -> models.User:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    user_id = verify_access_token(token)
-    if user_id is None:
-        raise credentials_exception
-    try:
-        user_id_int = int(user_id)
-    except (TypeError, ValueError):
+    username = verify_access_token(token)
+    if username is None:
         raise credentials_exception
 
     result = await db.execute(
-        select(models.Users).where(models.Users.id == user_id_int)
+        select(models.User).where(models.User.username == username)
     )
     user = result.scalars().first()
     if not user:
@@ -112,4 +126,39 @@ async def get_current_user(
     return user
 
 
-CurrentUser = Annotated[models.Users, Depends(get_current_user)]
+async def get_current_vendor(
+    token: Annotated[str, Depends(oauth2_scheme)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> models.Vendor:
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    username = verify_access_token(token)
+    if username is None:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail=InvalidTokenError)
+
+    result = await db.execute(
+        select(models.Vendor).where(models.Vendor.email == username)
+    )
+    user = result.scalars().first()
+    if not user:
+        raise credentials_exception
+    return user
+
+
+async def get_current_active_user(
+    current_user: Annotated[UserResponse, Depends(get_current_user)],
+):
+    if not current_user.is_active:
+        raise HTTPException(status_code=400, detail="Inactive user")
+    return current_user
+
+
+async def get_current_active_vendor(
+    current_user: Annotated[VendorResponse, Depends(get_current_vendor)],
+):
+    if not current_user.is_active:
+        raise HTTPException(status_code=400, detail="Inactive user")
+    return current_user
