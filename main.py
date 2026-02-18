@@ -1,6 +1,8 @@
 from contextlib import asynccontextmanager
 
 import auth
+import catalog
+import cart
 from fastapi import FastAPI
 from database import engine, Base
 
@@ -20,4 +22,6 @@ async def lifespan(_app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 
-app.include_router(auth.router, tags=["authentication"])
+app.include_router(auth.router, prefix="/auth", tags=["authentication"])
+app.include_router(catalog.router, prefix="/api/products", tags=["catalog"])
+app.include_router(cart.router, prefix="/api/cart", tags=["Cart"])
