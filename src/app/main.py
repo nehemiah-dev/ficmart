@@ -1,0 +1,36 @@
+from contextlib import asynccontextmanager
+
+from app.routes import auth
+from app.routes import catalog
+from app.routes import cart
+from app.routes import checkout
+import app.webhook as webhook
+from fastapi import FastAPI
+from app.database import engine, Base
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    # startup
+    async with engine.begin() as conn:
+        print("Starting database engine...")
+        await conn.run_sync(Base.metadata.create_all)
+    yield
+    # shutdown
+    print("Shutting down database engine")
+    await engine.dispose()
+
+
+version = "v1"
+app = FastAPI(
+    version=version,
+    title="Ficmart",
+    description="An E-commerce webAPI",
+    lifespan=lifespan,
+)
+
+app.include_router(webhook.router, prefix="/api/webhook", tags=["webhook"])
+app.include_router(auth.router, prefix="/auth/login", tags=["authentication"])
+app.include_router(catalog.router, prefix="/api/products", tags=["catalog"])
+app.include_router(cart.router, prefix="/api/cart", tags=["Cart"])
+app.include_router(checkout.router, prefix="/api/checkout", tags=["Checkout"])
