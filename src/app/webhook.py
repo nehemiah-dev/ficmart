@@ -12,7 +12,7 @@ import hmac
 router = APIRouter()
 
 
-@router.post("")
+@router.post("", status_code=201)
 async def webhook_listener(
     request: Request, db: Annotated[AsyncSession, Depends(get_db)]
 ):
@@ -44,35 +44,39 @@ async def webhook_listener(
             "Authorization": f"Bearer {settings.paystack_secret_key.get_secret_value()}",
             "Accept": "application/json",
         }
-        async with httpx.AsyncClient() as client:
-            response = await client.get(
-                url=f"{settings.paystack_url}/verify/{reference}", headers=headers
-            )
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.get(
+                    url=f"{settings.paystack_url}/verify/{reference}", headers=headers
+                )
 
-            print("Response text:", response.text)
-            if response.status_code == 200:
-                result = response.json()
-                message = result["message"]
-                if not message == "Verification successful":
-                    raise HTTPException(
-                        status.HTTP_400_BAD_REQUEST, detail="Payment failed"
+                # print("Response text:", response.text)
+                if response.status_code == 200:
+                    result = response.json()
+                    message = result["message"]
+                    if not message == "Verification successful":
+                        raise HTTPException(
+                            status.HTTP_400_BAD_REQUEST, detail="Payment failed"
+                        )
+                    print(result)
+                    # return result
+                    user_id = data["metadata"]["user_id"]
+                    # name = data["metadata"]["name"]
+                    reference = data["reference"]
+                    email = data["customer"]["email"]
+                    amount = data["amount"]
+                    order_data = TransactionCreate(
+                        user_id=int(user_id),
+                        reference=reference,
+                        email=email,
+                        amount=amount,
                     )
-                print(result)
-                # return result
-                user_id = data["customer"]["user_id"]
-                reference = data["reference"]
-                email = data["customer"]["email"]
-                amount = data["amount"]
-                order_data = TransactionCreate(
-                    user_id=int(user_id),
-                    reference=reference,
-                    email=email,
-                    amount=amount,
-                )
-                await create_order(user_id, order_data, db)
-            else:
-                raise HTTPException(
-                    status.HTTP_400_BAD_REQUEST, detail="Verification failed"
-                )
+                    await create_order(order_data, db)
+                else:
+                    raise HTTPException(
+                        status.HTTP_400_BAD_REQUEST, detail="Verification failed"
+                    )
+        except ConnectionError as e:
+            return {"message": f"Connection error: {e}"}
 
     return {"message": "Successfull"}
