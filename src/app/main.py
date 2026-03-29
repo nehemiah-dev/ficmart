@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
 
+from app.routes import health
 from app.routes import auth
 from app.routes import catalog
 from app.routes import cart
@@ -29,6 +30,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+app.include_router(health.router, prefix="/health", tags=["health"])
 app.include_router(webhook.router, prefix="/api/webhook", tags=["webhook"])
 app.include_router(auth.router, prefix="/auth", tags=["authentication"])
 app.include_router(catalog.router, prefix="/api/products", tags=["catalog"])
