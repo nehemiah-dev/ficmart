@@ -5,8 +5,10 @@ from app.models import models
 from app.schemas.order import TransactionCreate
 
 
-async def create_order(user_id: int, order_data: TransactionCreate, db: AsyncSession):
-    result = await db.execute(select(models.User).where(models.User.id == user_id))
+async def create_order(order_data: TransactionCreate, db: AsyncSession):
+    result = await db.execute(
+        select(models.User).where(models.User.id == order_data.user_id)
+    )
     user = result.scalars().first()
     if not user:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail="User not found")
