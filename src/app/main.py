@@ -30,7 +30,7 @@ app = FastAPI(
 )
 
 app.include_router(webhook.router, prefix="/api/webhook", tags=["webhook"])
-app.include_router(auth.router, prefix="/auth/login", tags=["authentication"])
+app.include_router(auth.router, prefix="/auth", tags=["authentication"])
 app.include_router(catalog.router, prefix="/api/products", tags=["catalog"])
 app.include_router(cart.router, prefix="/api/cart", tags=["Cart"])
 app.include_router(checkout.router, prefix="/api/checkout", tags=["Checkout"])
