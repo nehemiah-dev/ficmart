@@ -52,6 +52,7 @@ async def checkout(
 
     items = db_cart.carts.items
     user_id = db_cart.id
+    name = db_cart.fullname
     email = db_cart.email
     for item in items:
         quantity = item.quantity
@@ -70,20 +71,26 @@ async def checkout(
             # return {"price": total_amount}
 
     payload = {
-        "user_id": user_id,
         "email": email,
         "amount": amount,
         "channel": channel,
         "reference": generate_transaction_reference(),
+        "metadata": {
+            "user_id": user_id,
+            "name": name,
+        },
     }
     headers = {
         "Authorization": f"Bearer {settings.paystack_secret_key.get_secret_value()}",
         "Accept": "application/json",
     }
-    async with httpx.AsyncClient() as client:
-        response = await client.post(
-            url=str(f"{settings.paystack_url}/initialize"),
-            json=payload,
-            headers=headers,
-        )
-        return response.json()
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                url=str(f"{settings.paystack_url}/initialize"),
+                json=payload,
+                headers=headers,
+            )
+            return response.json()
+    except ConnectionError as e:
+        return f"Connection error, please try again: {e}"

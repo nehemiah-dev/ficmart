@@ -40,7 +40,7 @@ async def get_product(
     return products
 
 
-@router.post("/{public_id}", response_model=ProductResponse)
+@router.post("/{public_id}", response_model=ProductResponse, status_code=201)
 async def create_product(
     product_data: ProductCreate,
     db: Annotated[AsyncSession, Depends(get_db)],
