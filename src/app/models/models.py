@@ -9,6 +9,7 @@ from sqlalchemy import (
     CheckConstraint,
     UniqueConstraint,
     Index,
+    Boolean,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -308,7 +309,7 @@ class Order(Base, TimestampMixin):
     )
     amount: Mapped[float] = mapped_column(Numeric(10, 2), nullable=False)
     reference: Mapped[str] = mapped_column(
-        String(20), unique=True, nullable=False, default=lambda: str(uuid4())
+        String(50), unique=True, nullable=False, default=lambda: str(uuid4())
     )
     currency: Mapped[str] = mapped_column(String(5), nullable=False, default="NGN")
 
@@ -385,3 +386,25 @@ class Token(Base):
             f"user_id={self.user_id}" if self.user_id else f"vendor_id={self.vendor_id}"
         )
         return f"<Token(id={self.id}, {owner}, active={self.is_active})>"
+
+
+class PasswordReset(Base):
+    __tablename__ = "password_reset"
+    __table_args__ = {"schema": "public"}
+    id: Mapped[int] = mapped_column(
+        Integer, index=True, primary_key=True, nullable=False
+    )
+    user_id: Mapped[int] = mapped_column(
+        Integer,
+        ForeignKey("public.users.id", ondelete="cascade"),
+        index=True,
+        nullable=False,
+    )
+    token: Mapped[str] = mapped_column(String, unique=True, nullable=False)
+    used: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
+    )
+    expires_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False
+    )
