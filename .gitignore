@@ -9,5 +9,6 @@ wheels/
 # Virtual environments
 .venv
 .env
+.pgpass
 ficmart.db
 snipet.txt
