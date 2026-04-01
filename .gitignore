@@ -11,4 +11,4 @@ wheels/
 .env
 .pgpass
 ficmart.db
-snipet.txt
+secrets/*
