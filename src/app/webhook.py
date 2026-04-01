@@ -3,6 +3,7 @@ from fastapi import APIRouter, Request, HTTPException, status, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
 from app.services.order import create_order
+from app.services.cart import delete_cart
 from app.schemas.order import TransactionCreate
 from app.config import settings
 import httpx
@@ -12,7 +13,7 @@ import hmac
 router = APIRouter()
 
 
-@router.post("", status_code=201)
+@router.post("", status_code=200)
 async def webhook_listener(
     request: Request, db: Annotated[AsyncSession, Depends(get_db)]
 ):
@@ -58,8 +59,7 @@ async def webhook_listener(
                         raise HTTPException(
                             status.HTTP_400_BAD_REQUEST, detail="Payment failed"
                         )
-                    print(result)
-                    # return result
+
                     user_id = data["metadata"]["user_id"]
                     # name = data["metadata"]["name"]
                     reference = data["reference"]
@@ -72,6 +72,7 @@ async def webhook_listener(
                         amount=amount,
                     )
                     await create_order(order_data, db)
+                    await delete_cart(user_id, db)
                 else:
                     raise HTTPException(
                         status.HTTP_400_BAD_REQUEST, detail="Verification failed"
