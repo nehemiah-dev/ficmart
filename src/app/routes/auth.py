@@ -212,5 +212,4 @@ async def reset_password(
         delete(models.PasswordReset).where(models.PasswordReset.token == token)
     )
     await db.commit()
-    await db.refresh(db_token)
     return {"message": "Password reset successful, login with new password"}
