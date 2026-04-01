@@ -12,9 +12,16 @@ async def create_order(order_data: TransactionCreate, db: AsyncSession):
     user = result.scalars().first()
     if not user:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail="User not found")
-    order_data_dict = order_data.model_dump()
-    order = models.Order(**order_data_dict)
+    order_result = await db.execute(
+        select(models.Order).where(models.Order.reference == order_data.reference)
+    )
+    db_order = order_result.scalars().first()
+    if not db_order:
+        order_data_dict = order_data.model_dump()
+        order = models.Order(**order_data_dict)
 
-    db.add(order)
-    await db.commit()
-    await db.refresh(order)
+        db.add(order)
+        await db.commit()
+        await db.refresh(order)
+        return db_order
+    return {"message": "Transaction already exist"}
