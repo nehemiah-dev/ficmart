@@ -1,0 +1,100 @@
+services:
+  backend:
+    build: .
+    ports:
+      - "8080:8000"
+    environment:
+      - PG_USER=${PG_USER}
+      - PAYSTACK_URL=${PAYSTACK_URL}
+      - MAIL_USERNAME=${MAIL_USERNAME}
+    secrets:
+      - sqlalchemy_secret
+      - paystack_secret_key
+      - jwt_secret_key
+      - refresh_token_secret
+      - mail_password
+    networks:
+      - backend
+    depends_on:
+      database:
+        condition: service_healthy
+    restart: always
+    command: >
+      sh -c "
+      exec gunicorn -k uvicorn.workers.UvicornWorker app.main:app --bind 0.0.0.0:8000
+      "
+  worker:
+    build: .
+    networks:
+      - backend
+    environment:
+      - PG_USER=${PG_USER}
+      - PAYSTACK_URL=${PAYSTACK_URL}
+      - MAIL_USERNAME=${MAIL_USERNAME}
+    secrets:
+      - sqlalchemy_secret
+      - paystack_secret_key
+      - jwt_secret_key
+      - refresh_token_secret
+      - mail_password
+    restart: always
+    depends_on:
+      redis:
+        condition: service_started
+      database:
+        condition: service_healthy
+    command: >
+      sh -c "
+      exec celery -A app.workers.mail_workers worker --loglevel=info
+      "
+    healthcheck:
+      test: ["CMD", "celery", "-A", "app.workers.mail_workers", "inspect", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+  
+  redis:
+    image: redis:7
+    networks:
+      - backend
+    restart: always
+  database:
+    image: postgres:15
+    environment:
+      - POSTGRES_PASSWORD_FILE=/run/secrets/sqlalchemy_secret
+      - POSTGRES_USER=${PG_USER}
+    secrets:
+      - sqlalchemy_secret
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - backend
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PG_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+      
+volumes:
+  db_data:
+networks:
+  backend:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.0.0.0/24
+secrets:
+  sqlalchemy_secret:
+    file: ./secrets/sqlalchemy_secret
+  paystack_secret_key:
+    file: ./secrets/paystack_key
+  jwt_secret_key:
+    file: ./secrets/jwt_secret
+  refresh_token_secret:
+    file: ./secrets/jwt_refresh
+  mail_password:
+    file: ./secrets/mail_secret
+    
+    
