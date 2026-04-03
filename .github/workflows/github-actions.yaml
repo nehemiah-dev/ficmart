@@ -1,0 +1,21 @@
+name: Ficmart workflow
+on: [push]
+env:
+  VERSION: ${{ github.sha }}
+  IMAGE_NAME: ficmart
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Login to dockerhub
+      run: |
+        echo "${{ secrets.DOCKERHUB_SECRET }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+
+    - name: Build the docker image
+      run: |
+        docker build -f Dockerfile -t $IMAGE_NAME:$VERSION .
+    - name: Push image to dockerhub
+      run: |
+        docker push ${{ secrets.DOCKERHUB_USERNAME }}/$IMAGE_NAME:$VERSION
