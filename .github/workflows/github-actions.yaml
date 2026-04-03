@@ -18,4 +18,5 @@ jobs:
         docker build -f Dockerfile -t $IMAGE_NAME:$VERSION .
     - name: Push image to dockerhub
       run: |
-        docker push ${{ secrets.DOCKERHUB_USERNAME }}/$IMAGE_NAME:$VERSION
+        docker tag $IMAGE_NAME:$VERSION ${{ secrets.DOCKERHUB_USERNAME }}/$IMAGE_NAME:$VERSION
+        docker push $IMAGE_NAME:$VERSION
