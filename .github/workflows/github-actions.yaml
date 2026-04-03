@@ -19,4 +19,4 @@ jobs:
     - name: Push image to dockerhub
       run: |
         docker tag $IMAGE_NAME:$VERSION ${{ secrets.DOCKERHUB_USERNAME }}/$IMAGE_NAME:$VERSION
-        docker push $IMAGE_NAME:$VERSION
+        docker push ${{ secrets.DOCKERHUB_USERNAME }}/$IMAGE_NAME:$VERSION
