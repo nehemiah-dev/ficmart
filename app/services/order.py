@@ -1,8 +1,8 @@
 from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.models import models
-from app.schemas.order import TransactionCreate
+from models import models
+from schemas.order import TransactionCreate
 
 
 async def create_order(order_data: TransactionCreate, db: AsyncSession):

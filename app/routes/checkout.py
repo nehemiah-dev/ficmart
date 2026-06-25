@@ -4,13 +4,13 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.database import get_db
+from database import get_db
 
-from app.models import models
-from app.schemas.user import UserResponse
-from app.config import settings
-from app.utils.auth import get_current_active_user
-from app.utils.reference import generate_transaction_reference
+from models import models
+from schemas.user import UserResponse
+from config import settings
+from utils.auth import get_current_active_user
+from utils.reference import generate_transaction_reference
 
 router = APIRouter()
 

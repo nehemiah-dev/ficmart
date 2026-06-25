@@ -3,13 +3,13 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.models import models
-from app.database import get_db
-from app.schemas.user import (
+from models import models
+from database import get_db
+from schemas.user import (
     UserResponse,
 )
-from app.schemas.cart import CartItemResponse
-from app.utils.auth import get_current_active_user
+from schemas.cart import CartItemResponse
+from utils.auth import get_current_active_user
 
 router = APIRouter()
 

@@ -1,13 +1,13 @@
 from contextlib import asynccontextmanager
 
-from app.routes import health
-from app.routes import auth
-from app.routes import catalog
-from app.routes import cart
-from app.routes import checkout
-import app.webhook as webhook
+from routes import health
+from routes import auth
+from routes import catalog
+from routes import cart
+from routes import checkout
+import webhook as webhook
 from fastapi import FastAPI
-from app.database import engine, Base
+from database import engine, Base
 
 
 @asynccontextmanager

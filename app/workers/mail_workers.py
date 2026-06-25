@@ -1,8 +1,8 @@
-from app.workers.celery import celery
+from workers.celery import celery
 from fastapi_mail import FastMail, ConnectionConfig, MessageSchema, MessageType
-from app.config import settings
+from config import settings
 import asyncio
-from app.workers.templates import welcome_template, order_template
+from workers.templates import welcome_template, order_template
 from dotenv import load_dotenv
 
 load_dotenv()

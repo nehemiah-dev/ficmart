@@ -1,6 +1,6 @@
 from typing import Annotated
 from fastapi import APIRouter, Depends
-from app.database import get_db
+from database import get_db
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 

@@ -1,11 +1,11 @@
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase
-from app.config import settings
+from config import settings
 
 db_url = (
     f"postgresql+asyncpg://{settings.pg_user}:"
     f"{settings.sqlalchemy_secret.get_secret_value()}"
-    f"@database:5432/ficmart"
+    f"@localhost:5432/ficmart"
 )
 # db_url = settings.sqlalchemy_database_url
 engine = create_async_engine(url=str(db_url))

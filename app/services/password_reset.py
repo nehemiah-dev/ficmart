@@ -1,9 +1,9 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.schemas.password_reset import PasswordResetCreate
-from app.models import models
+from schemas.password_reset import PasswordResetCreate
+from models import models
 from starlette.responses import JSONResponse
-from app.utils.auth import get_password_hash
+from utils.auth import get_password_hash
 
 
 async def save_reset_details(data: PasswordResetCreate, db: AsyncSession):

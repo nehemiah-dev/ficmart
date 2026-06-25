@@ -3,12 +3,12 @@ from datetime import datetime, timedelta, UTC
 from fastapi import APIRouter, Depends, HTTPException, status, Form
 from fastapi.security import OAuth2PasswordRequestForm
 
-from app.models import models
-from app.database import get_db
+from models import models
+from database import get_db
 from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.utils.auth import (
+from utils.auth import (
     authenticate_user,
     authenticate_vendor,
     create_access_token,
@@ -17,13 +17,13 @@ from app.utils.auth import (
     get_current_active_user,
     get_current_active_vendor,
 )
-from app.utils.tokens import generate_reset_token
-from app.schemas.user import UserCreate, UserResponse
-from app.schemas.vendor import VendorCreate, VendorResponse
-from app.schemas.password_reset import PasswordResetCreate
-from app.services.password_reset import save_reset_details, update_password
+from utils.tokens import generate_reset_token
+from schemas.user import UserCreate, UserResponse
+from schemas.vendor import VendorCreate, VendorResponse
+from schemas.password_reset import PasswordResetCreate
+from services.password_reset import save_reset_details, update_password
 
-from app.workers.mail_workers import send_signup_mail, send_reset_email
+from workers.mail_workers import send_signup_mail, send_reset_email
 
 router = APIRouter()
 

@@ -1,6 +1,6 @@
 from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.models import models
+from models import models
 
 
 async def delete_cart(user_id: int, db: AsyncSession):

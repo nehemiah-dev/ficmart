@@ -9,11 +9,11 @@ from pwdlib import PasswordHash
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-from app.models import models
-from app.config import settings
-from app.database import get_db
-from app.schemas.user import UserResponse
-from app.schemas.vendor import VendorResponse
+from models import models
+from config import settings
+from database import get_db
+from schemas.user import UserResponse
+from schemas.vendor import VendorResponse
 
 HASHING_ALGORITHM = settings.hashing_algorithm
 JWT_SECRET_KEY = str(settings.jwt_secret_key)

@@ -3,11 +3,11 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.models import models
-from app.database import get_db
-from app.schemas.product import ProductCreate, ProductResponse
-from app.schemas.vendor import VendorResponse
-from app.utils.auth import get_current_active_vendor
+from models import models
+from database import get_db
+from schemas.product import ProductCreate, ProductResponse
+from schemas.vendor import VendorResponse
+from utils.auth import get_current_active_vendor
 
 router = APIRouter()
 

@@ -19,7 +19,7 @@ from uuid import uuid4
 from datetime import datetime, UTC
 from typing import Optional
 
-from app.database import Base
+from database import Base
 
 
 class TimestampMixin:
